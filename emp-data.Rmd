@@ -1,0 +1,328 @@
+---
+title: "EMP Data 2024"
+author: "Catarina Pien"
+date: "2025-02-10"
+output:
+  pdf_document:
+    latex_engine: xelatex
+sansfont: Calibri
+fontsize: 12pt
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+```{r, include = FALSE}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(lubridate)
+library(readr)
+library(sharpshootR)
+library(viridis)
+```
+
+# Goal
+
+Examine USBR stations listed in the Water Quality Control Plan to determine whether we are meeting requirements.
+
+## Notes
+
+**Communications from Ted**
+
+* The station contact is Melanie Lowe at USBR's California-Great Basin Regional Office
+* When we last emailed in December, she said “our office staff clean and calibrate the stations monthly when we are able to access them, and Central Valley Office coordinates with Tracy Office regarding issues w/access or stations going down/not reporting. However, I believe Tracy Office is currently cleaning/calibrating/maintaining the Collinsville and Ripon stations routinely.”
+* C19 discontinued due to safety concerns and because the city of Vallejo no longer uses the intake on Cache Slough. Ted was not able to find any documentation that this was ever officially communicated to SWRCB. 
+
+**Requirements in Table 5 of the WQCP**
+
+* 15-minute Electrical Conductivity and Water Temperature at CLL, SAL, CNT, UNI, PCT, CCS, EMM
+* 1 to 15-minute EC, WT, pH, DO, turbidity, chlorophyll a fluorescence, tidal elevation and meteorological data (air temperature, wind speed and direction, solar radiation) for DMC
+
+**What is on CDEC**
+
+*	C2 – Sacramento River at Collinsville (CLL): EC (100 - event), WT (25 - hourly)
+*	C4 – SJR at San Andreas Landing (SAL): EC (100 - event), WT (25 - hourly)
+* C5 – Contra Costa Canal at Pumping Plant #1 (CNT): EC (100 - event), WT (25 - hourly)
+*	C8 – Old River near Middle River (UNI): EC (100 - event), WT (25 - hourly)
+*	C14 – Sacramento River at Port Chicago (PCT): EC (sensor 100), WT (25 - event)
+*	*C19 – Cache Slough at City of Vallejo Intake (CCS): discontinued 1/1/2015
+*	D22 – Sacramento River at Emmaton (EMM): EC (100 - event), WT (25 - hourly)
+*	DMC1 – Delta-Mendota Canal at Jones Pumping Plant (DMC): EC (100 - event), WT (25 - hourly)
+
+**Conclusions**
+
+* We are not quite collecting at the frequency specified by Table 5 for water temperature. 
+* We are not collecting all the parameters specifed by Table 5 for DMC. 
+* Most stations seem to be collected relatively well for 2024, except CNT which was missing a few months of data. 
+* CLL and DMC also have >10% data outside of suitable range/not collected.
+
+**Next Steps**
+
+* We could get the QA/QC protocols from Melanie's group. All we did here was basic range filtering, and not even 100% sure of appropriate EC range.
+* We could check if extra data are collected that are not reported on CDEC.
+* We could check why certain parameters are collected at frequencies different from what has been specified in the Water Quality Control Plan
+
+\pagebreak
+# Analysis
+
+## Electrical Conductivity 
+
+### Download data
+```{r download data, include = FALSE}
+# stations <- c("CLL", "SAL", "CNT", "UNI", "PCT", "CCS", "EMM", "DMC")
+# start <- "2024-01-01"
+# end <- "2024-12-31"
+# 
+# ec_data <- lapply(stations,
+#                    function(x) {
+#                      CDECquery(id = x,sensor = 100, interval = "E", start = start,end = end)
+#                      })
+# ec <- bind_rows(ec_data) %>%
+#   mutate(datetime = format(as.POSIXct(datetime), "%Y-%m-%d %H:%M:%S"),
+#          date = date(datetime),
+#          year = year(date),
+#          month = factor(month(date)),
+#          doy = yday(date),
+#          day = day(date)) %>%
+#   mutate(range = if_else(station_id %in% c("CNT", "DMC", "SAL", "UNI") & value>1000, 0L,1L))
+
+# saveRDS(ec, "data/data_raw/ec_2024.rds")
+ec <- readRDS("data/data_raw/ec_2024.rds") %>% mutate(month = factor(month))
+```
+
+### Examine range of values
+```{r , fig.cap = "Boxplot of EC (uS/cm) values in 2024.", fig.height = 7, fig.width = 6}
+ggplot(ec %>% filter(!is.na(month))) + 
+  geom_boxplot(aes(month,value, fill = month))+
+  facet_wrap(~station_id, scales = "free_y", ncol = 2) +
+  labs(y = "EC (uS/cm)")+
+  theme_bw() + 
+  theme(legend.position = "bottom")
+```
+
+\pagebreak
+Filtered to suitable ranges, with 1000 uS/cm as upper limit for CNT, DMC, SAL, UNI, and no upper limit for other stations.
+
+### Histogram for filtered values
+```{r, fig.height = 8, fig.width = 6, fig.cap = "Histogram of EC values.", fig.height = 6, fig.width = 5.5}
+ggplot(ec %>%filter(range == 1)) + geom_histogram(aes(value), color = "lightblue4")+
+  facet_wrap(~station_id, scales = "free_x", ncol = 2) +
+  labs(x = "EC (uS/cm)")+
+  theme_bw()
+```
+
+\pagebreak
+## Water Temperature
+
+### Download Data
+```{r, include = FALSE}
+# wt_data <- lapply(stations,
+#                    function(x) {
+#                      CDECquery(id = x,sensor = 25, interval = "H", start = start,end = end)
+#                      })
+# wt <- bind_rows(wt_data)%>%
+#   mutate(datetime = format(as.POSIXct(datetime), "%Y-%m-%d %H:%M:%S"),
+#          date = date(datetime),
+#          year = year(date),
+#          month = factor(month(date)),
+#          doy = yday(date),
+#          day = day(date)) %>%
+#   mutate(range = if_else(value<30 | value > 100 , 0L, 1L))
+# 
+# saveRDS(wt, "data/data_raw/wt_2024.rds")
+wt <- readRDS("data/data_raw/wt_2024.rds") %>% mutate(month = factor(month))
+```
+
+### Examine range of water temperature values
+```{r, fig.cap = "Boxplot of WT (deg F) values in 2024.", fig.height = 7, fig.width = 6}
+ggplot(wt %>% filter(!is.na(month))) + 
+  geom_boxplot(aes(month, value, fill = month))+
+  facet_wrap(~station_id, scales = "free_y", ncol = 2)+
+  labs(y = "Water Temperature (F)")+
+  theme_bw()+
+  theme(legend.position = "bottom")
+
+```
+
+\pagebreak
+Filtered to suitable ranges, with 30F as lower limit and 100F as upper limit.
+Not sure what the deal with DMC is in February, CLL in August.
+
+### Filtered data histogram
+```{r, fig.cap = "Histogram of WT values.", fig.heigh = 6, fig.width = 5.5}
+ggplot(wt %>%filter(range == 1)) + geom_histogram(aes(value), color = "lightblue4")+
+  facet_wrap(~station_id, ncol = 2) +
+  labs(x = "Water Temperature (F)")+
+  theme_bw()
+```
+
+
+\pagebreak
+
+### Annual Summary
+
+```{r}
+prop_ec_year <- ec %>%
+  group_by(station_id) %>%
+  summarize(n = n(),
+            max = max(value),
+            min=min(value),
+            sum_good = sum(range, na.rm = TRUE),
+            prop_good = round(sum_good/n,3), # data within range/data collected
+            prop_all = round(sum_good/(24*4*366),3))%>%#data within range/data that should have been collected if every time step was collected
+  mutate(sensor = "EC")
+```
+
+```{r}
+prop_wt_year <- wt %>%
+  group_by(station_id) %>%
+  summarize(n = n(),
+            max = max(value),
+            min=min(value),
+            sum_good = sum(range, na.rm = TRUE),
+            prop_good = round(sum_good/n,3),
+            prop_all = round(sum_good/(24*366),3)) %>%
+  mutate(sensor = "Temperature")
+```
+
+```{r}
+prop_data <- bind_rows(prop_ec_year, prop_wt_year)
+```
+
+# Summary
+```{r, fig.cap = "Proportion of EC and WT Data Collected and within Range in 2024."}
+ggplot(prop_data) + 
+  geom_col(aes(station_id, prop_all, fill = sensor), position = position_dodge2()) +
+  scale_fill_manual(values = c("orange2", "steelblue4")) +
+  labs(x = "Station Code", y = "Proportion Data Within Reasonable Range") + 
+  scale_y_continuous(breaks = seq(0, 1, by = 0.1)) + 
+  theme_bw()
+```
+
+\pagebreak
+```{r , tab.cap= "Sample Sizes of Data and Proportion of Good Data. Prop_good = Proportion of data that was collected that was within range. Prop_all = Proportion of data that should have been collected (if all time points were available) that was within range."}
+library(kableExtra)
+kableExtra::kable(prop_data)
+```
+
+
+\pagebreak
+# Individual Station Plots
+
+## Electrical Conductivity
+```{r , include = FALSE}
+proportional_ec <- ec %>%
+  group_by(station_id, date, year, month,doy, day) %>%
+  summarize(n = n(),
+            max = max(value),
+            min=min(value),
+            sum_good = sum(range, na.rm = TRUE),
+            prop_good = sum_good/n,
+            prop = sum_good/(24*4))
+```
+
+```{r, include = FALSE}
+plot_ec <- function(x) {
+ggplot(proportional_ec %>% filter(station_id == x, !is.na(month))) + 
+    geom_tile(aes(day, month, fill = prop), color = "black") +
+    scale_x_continuous(breaks = seq(1,31, by = 1)) + 
+    scale_fill_viridis(option = "plasma") + 
+    labs(title = x) + 
+    theme_classic()
+  }
+```
+
+```{r, fig.cap = "Proportion of EC values collected and within range by day at CLL. White boxes are missing data for the entire day."}
+plot_ec("CLL")
+```
+
+\pagebreak
+```{r, fig.cap = "Proportion of EC values collected and within range by day at CNT. White boxes are missing data for the entire day."}
+plot_ec("CNT")
+```
+
+\pagebreak
+```{r, fig.cap = "Proportion of EC values collected and within range by day at SAL White boxes are missing data for the entire day."}
+plot_ec("SAL")
+```
+
+\pagebreak
+```{r, fig.cap = "Proportion of EC values collected and within range by day at UNI White boxes are missing data for the entire day."}
+plot_ec("UNI")
+```
+
+\pagebreak
+```{r, fig.cap = "Proportion of EC values collected and within range by day at PCT. White boxes are missing data for the entire day."}
+plot_ec("PCT")
+```
+
+\pagebreak
+```{r, fig.cap = "Proportion of EC values collected and within range by day at EMM. White boxes are missing data for the entire day."}
+plot_ec("EMM")
+```
+
+\pagebreak
+```{r, fig.cap = "Proportion of EC values collected and within range by day at DMC. White boxes are missing data for the entire day."}
+plot_ec("DMC")
+```
+
+\pagebreak
+
+## Water Temperature
+
+```{r , include = FALSE}
+proportional_wt <- wt %>%
+  group_by(station_id, date, year, month,doy, day) %>%
+  summarize(n = n(),
+            max = max(value),
+            min=min(value),
+            sum_good = sum(range, na.rm = TRUE),
+            prop_good = sum_good/n,
+            prop = sum_good/24)
+```
+
+```{r, include = FALSE}
+plot_wt <- function(x) {
+ggplot(proportional_wt %>% filter(station_id == x, !is.na(month))) + 
+    geom_tile(aes(day, month, fill = prop), color = "black") +
+    scale_x_continuous(breaks = seq(1,31, by = 1)) + 
+    scale_fill_viridis(option = "mako") + 
+    labs(title = x) + 
+    theme_classic()
+  }
+```
+
+```{r, fig.cap = "Proportion of WT values collected and within range by day at CLL. White boxes are missing data for the entire day."}
+plot_wt("CLL")
+```
+
+\pagebreak
+```{r, fig.cap = "Proportion of WT values collected and within range by day at CNT. White boxes are missing data for the entire day."}
+plot_wt("CNT")
+```
+
+\pagebreak
+```{r, fig.cap = "Proportion of WT values collected and within range by day at CNT. White boxes are missing data for the entire day."}
+plot_wt("SAL")
+```
+
+\pagebreak
+```{r, fig.cap = "Proportion of WT values collected and within range by day at UNI. White boxes are missing data for the entire day."}
+plot_wt("UNI")
+```
+
+\pagebreak
+```{r, fig.cap = "Proportion of WT values collected and within range by day at PCT. White boxes are missing data for the entire day."}
+plot_wt("PCT")
+```
+
+\pagebreak
+```{r, fig.cap = "Proportion of WT values collected and within range by day at EMM. White boxes are missing data for the entire day."}
+plot_wt("EMM")
+```
+
+\pagebreak
+```{r, fig.cap = "Proportion of WT values collected and within range by day at DMC. White boxes are missing data for the entire day."}
+plot_wt("DMC")
+```
