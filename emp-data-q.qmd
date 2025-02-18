@@ -1,13 +1,10 @@
 ---
-title: "EMP Data 2024"
+title: "emp-data"
 author: "Catarina Pien & Lilly McCormick"
-date: "2025-02-11"
-output:
-  pdf_document:
-    latex_engine: xelatex
-sansfont: Calibri
-fontsize: 12pt
+format: docx
+editor: visual
 ---
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
@@ -54,7 +51,9 @@ and meteorological data (air temperature, wind speed and direction, solar radiat
 
 **Conclusions**
 
-* We are unsure if we are supposed to be collecting WT, EC, AND DO at the 15-minute interval. If so, we are only collecting EC at the frequency specified by Table 5 for water temperature. Currently checking with EMP, and if unclear can follow up with Melanie and Water Board contacts.
+* We are unsure if we are supposed to be collecting WT, EC, AND DO at the 15-minute interval. If so, we are only collecting EC at the frequency specified by Table 5 for water temperature. 
+  * Ted: In some cases, D-1641 has explicit compliance requirements related to one or the other parameters (e.g., EC at D10 and C14 as described in Table 4). This is also true for DO at P8, although that’s spelled out in the Bay-Delta Water Quality Control Plan rather than D-1641.
+  * Scott/Ted: Since 2007, the Continuous Environmental Monitoring Program (CEMP) has been capturing real-time data every 15 minutes for all water quality constituents, including SpC (EC), DO, and WT, from our 15 monitoring stations. / Scott’s decision to have his group move to fully-equipped instruments (pH, EC, Temp, DO, Chl-a, and Turbidity sensors) for all of their baseline/compliance stations even when not explicitly required by D-1641 came partially from internal DWR requests for that data but also just to avoid any confusion...generally our thought is calibrating six sensors on an EXO2 doesn’t really cost all that much more compared to just temp and EC (in either equipment or staff time) and the data is often quite valuable. 
 * We are not collecting all the parameters specifed by Table 5 for DMC. 
 * Most stations seem to be collected relatively well for 2024, except CNT which was missing a few months of data. 
 * CLL and DMC also have >10% data outside of suitable range/not collected.
@@ -64,6 +63,7 @@ and meteorological data (air temperature, wind speed and direction, solar radiat
 * We could get the QA/QC protocols from Melanie's group. All we did here was basic range filtering, and not 100% sure of appropriate EC range.
 * We could check if extra data are collected that are not reported on CDEC.
 * We could check why certain parameters are collected at frequencies different from what has been specified in the Water Quality Control Plan.
+* Ted: the new Bay-Delta Plan POI would really benefit from a separate table for continuous water quality that specifies exactly what parameters they want measured at each station. The footnote thing and differentiating between “continuous recorder” and “multiparameter” stations is really confusing
 
 \pagebreak
 # Analysis
@@ -228,10 +228,11 @@ proportional_ec <- ec %>%
 plot_ec <- function(x) {
 ggplot(proportional_ec %>% filter(station_id == x, !is.na(month))) + 
     geom_tile(aes(day, month, fill = prop), color = "black") +
-    scale_x_continuous(breaks = seq(1,31, by = 1)) + 
+    scale_x_continuous(breaks = seq(1,31, by = 2)) + 
     scale_fill_viridis(option = "plasma") + 
     labs(title = x) + 
-    theme_classic()
+    theme_classic()+
+    theme(legend.position = "bottom")
   }
 ```
 
@@ -288,10 +289,11 @@ proportional_wt <- wt %>%
 plot_wt <- function(x) {
 ggplot(proportional_wt %>% filter(station_id == x, !is.na(month))) + 
     geom_tile(aes(day, month, fill = prop), color = "black") +
-    scale_x_continuous(breaks = seq(1,31, by = 1)) + 
+    scale_x_continuous(breaks = seq(1,31, by = 2)) + 
     scale_fill_viridis(option = "mako") + 
     labs(title = x) + 
-    theme_classic()
+    theme_classic() +
+    theme(legend.position = "bottom")
   }
 ```
 
