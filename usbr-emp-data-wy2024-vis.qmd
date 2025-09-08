@@ -1,0 +1,167 @@
+---
+title: "USBR_EMP_Data_WY2024"
+format: pdf
+editor: visual
+---
+```{r}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+
+```{r}
+library(here)
+library(tidyverse)
+library(kableExtra)
+```
+
+
+# Read in raw and clean data
+```{r}
+dailydata_formatted <- readRDS(here("data/data_clean/usbr_contdata_wy2024.rds"))
+
+ec_raw <- readRDS(here("data/data_clean/ec_WY2024_flagged.rds")) %>%
+  select(station,
+         station_d1641,
+         ec,
+         datetime, month, flagged) %>%
+  mutate(datetime = ymd_hms(datetime),
+         month = month(datetime),
+         date = date(datetime)) %>%
+  filter(date > ymd("2023-09-30"))
+
+wt_raw <- readRDS("data/data_clean/wt_WY2024_flagged.rds")%>%
+  select(station ,
+         station_d1641,
+         wt,
+         datetime, month, flagged, range) %>%
+  mutate(datetime = ymd_hms(datetime),
+         month = month(datetime),
+         date = date(datetime)) %>%
+  filter(date > ymd("2023-09-30"))
+```
+
+# Look at initial data
+
+Removal of data occurred if: 
+
+- Value was out of range (less than or equal to zero, aside from CLL)
+- Over 70% of daily values were missing 
+- Data visually appeared as outlier
+
+## EC flagged data
+```{r, fig.width = 9, fig.height = 6.5}
+ggplot(ec_raw %>% filter(!is.na(datetime))) + 
+  geom_point(aes(datetime,ec, color = flagged), size = 0.75)+
+  facet_wrap(~station, scales = "free_y", ncol = 2) +
+  labs(y = "EC (uS/cm)")+
+  scale_x_datetime(date_breaks = "1 month", date_labels = "%b") +
+  scale_color_manual(values = c("magenta", "black"))+
+  theme_bw() + 
+  theme(legend.position = "bottom")
+```
+\newpage
+
+```{r, tab.cap = "Removed EC values"}
+ec_removed <- ec_raw %>%
+  group_by(station) %>%
+  summarize(removed = sum(flagged == "flagged", na.rm = TRUE),
+            values = n(),
+            nonNA_vals = sum(!is.na(ec)),
+            pct_removed = if_else(nonNA_vals>0, 
+                                  removed/nonNA_vals*100,
+                                  0))
+
+kableExtra::kable(ec_removed) %>%
+  kable_styling(c("striped", "condensed"),
+                full_width = F,
+                latex_options = "striped")
+```
+
+Removal of data occurred if: 
+
+- Value was out of range (less than or equal to 32, greater than or equal to 90)
+- Over 70% of daily values were missing 
+- Data visually appeared as outlier
+
+## Water temperature flagged data 
+```{r, fig.width = 9, fig.height = 6.5}
+ggplot(wt_raw %>% filter(!is.na(datetime))) + 
+  geom_point(aes(datetime,wt, color = flagged), size = 0.75)+
+  facet_wrap(~station, scales = "free_y", ncol = 2) +
+  labs(y = "Water Temperature (F)")+
+  scale_x_datetime(date_breaks = "1 month", date_labels = "%b") +
+   scale_color_manual(values = c("magenta", "black"))+
+  theme_bw() + 
+  theme(legend.position = "bottom")
+```
+
+## Water temperature flagged data (removing out of range data)
+```{r, fig.width = 9, fig.height = 6.5}
+ggplot(wt_raw %>% filter(!is.na(datetime), range==0L)) + 
+  geom_point(aes(datetime,wt, color = flagged), size = 0.75)+
+  facet_wrap(~station, scales = "free_y", ncol = 2) +
+  labs(y = "Water Temperature (F)")+
+  scale_x_datetime(date_breaks = "1 month", date_labels = "%b") +
+   scale_color_manual(values = c("magenta", "black"))+
+  theme_bw() + 
+  theme(legend.position = "bottom")
+```
+
+\newpage
+
+```{r, tab.cap = "Removed WT Values"}
+wt_removed <- wt_raw %>%
+  group_by(station) %>%
+  summarize(removed = sum(flagged == "flagged", na.rm = TRUE),
+            values = n(),
+            nonNA_vals = sum(!is.na(wt)),
+            pct_removed = if_else(nonNA_vals>0, 
+                                  removed/nonNA_vals*100,
+                                  0))
+
+kableExtra::kable(wt_removed) %>%
+  kable_styling(c("striped", "condensed"),
+                full_width = F,
+                latex_options = "striped")
+```
+
+# Look at final data 
+```{r}
+plot_vals <- function(CDEC_sta) {
+  ggplot(dailydata_formatted %>% filter(Site == CDEC_sta))+
+    geom_point(aes(Date, Value, color = Analyte)) +
+    facet_wrap(~Analyte, scales = "free_y", nrow = 2) +
+    labs(title = CDEC_sta)+
+    scale_color_manual(values = c("navy", "maroon4"))+
+    theme_bw()
+}
+```
+
+
+```{r, fig.width = 8, fig.height = 6}
+plot_vals("CLL")
+```
+
+```{r, fig.width = 8, fig.height = 6}
+plot_vals("CNT")
+```
+
+```{r, fig.width = 8, fig.height = 6}
+plot_vals("EMM")
+```
+
+```{r, fig.width = 8, fig.height = 6}
+plot_vals("PCT")
+```
+
+```{r, fig.width = 8, fig.height = 6}
+plot_vals("DMC")
+```
+
+```{r, fig.width = 8, fig.height = 6}
+plot_vals("UNI")
+```
+
+```{r, fig.width = 8, fig.height = 6}
+plot_vals("SAL")
+```
