@@ -474,7 +474,8 @@ ec_to_spc <- function(EC, temp, alpha = 0.019) {
 # Join ec and wt; convert ec to spc
 alldata <- full_join(ec_clean %>% select(station, station_d1641, month, datetime, date, ec),
           wt_clean%>% select(station, station_d1641, datetime, date, wt)) %>%
-  mutate(spc = ec_to_spc(ec, wt)) 
+  mutate(spc = ec_to_spc(ec, wt),
+         month = month(date)) 
 
 # Note: once we convert ec to spc we now 
 # just have hourly values for spc since we only have hourly water temp
