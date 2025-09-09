@@ -19,6 +19,9 @@ library(kableExtra)
 ```{r}
 dailydata_formatted <- readRDS(here("data/data_clean/usbr_contdata_wy2024.rds"))
 
+missing_flag <- 
+readRDS(here("data/data_clean/usbr_contdata_wy2024_missingflag.rds"))
+
 ec_raw <- readRDS(here("data/data_clean/ec_WY2024_flagged.rds")) %>%
   select(station,
          station_d1641,
@@ -45,7 +48,6 @@ wt_raw <- readRDS("data/data_clean/wt_WY2024_flagged.rds")%>%
 Removal of data occurred if: 
 
 - Value was out of range (less than or equal to zero, aside from CLL)
-- Over 70% of daily values were missing 
 - Data visually appeared as outlier
 
 ## EC flagged data
@@ -80,7 +82,6 @@ kableExtra::kable(ec_removed) %>%
 Removal of data occurred if: 
 
 - Value was out of range (less than or equal to 32, greater than or equal to 90)
-- Over 70% of daily values were missing 
 - Data visually appeared as outlier
 
 ## Water temperature flagged data 
@@ -126,6 +127,28 @@ kableExtra::kable(wt_removed) %>%
 ```
 
 # Look at final data 
+
+- While EC was collected at the 15-minute level, SpC required water temperature, which was collected at the hourly level.
+- At this stage we converted data to NA if >30% of daily data was missing
+
+\newpage
+```{r, tab.cap = "Percent of data removed due to daily missing values"}
+vals_removed <- missing_flag %>%
+  group_by(Site, Station, Analyte) %>%
+  summarize(removed = sum(missing_flag == 1L, na.rm = TRUE),
+            values = n(),
+            nonNA_vals = sum(!is.na(Value)),
+            pct_removed = if_else(nonNA_vals>0, 
+                                  removed/nonNA_vals*100,
+                                  0))
+
+kableExtra::kable(vals_removed) %>%
+  kable_styling(c("striped", "condensed"),
+                full_width = F,
+                latex_options = "striped")
+```
+
+
 ```{r}
 plot_vals <- function(CDEC_sta) {
   ggplot(dailydata_formatted %>% filter(Site == CDEC_sta))+
@@ -165,3 +188,7 @@ plot_vals("UNI")
 ```{r, fig.width = 8, fig.height = 6}
 plot_vals("SAL")
 ```
+
+
+
+

@@ -1,7 +1,7 @@
 # WY 2024 Data QC - Reclamation EMP stations
 # Catarina Pien (cpien@usbr.gov)
-# This code cleans up CDEC data for EMP reporting 
-# Lots of very specific QC rather than a general script
+# This code cleans up USBR's EMP data from CDEC data for EMP reporting 
+# Lots of very specific identifying of points rather than a general script
 
 # Load packages------------------
 library(here)
@@ -29,11 +29,17 @@ library(zoo)
 # DMC1 – Delta-Mendota Canal at Jones Pumping Plant (DMC): EC (100 - event), WT (25 - hourly)
 
 # Download data --------------------------
-## Electrical Conductivity -----------------------
+# removed CCS since no data
 stations <- c("CLL", "SAL", "CNT", "UNI", "PCT", "EMM", "DMC")
 start_date <- as.POSIXct("2023-10-01 00:00:00", tz = "UTC")
 end_date   <- as.POSIXct("2024-09-30 23:45:00", tz = "UTC")
+latlon <- data.frame(
+  station = stations,
+  lat = c(38.073981,38.103301,37.994950,37.822101, 38.056788, 38.084272, 37.781567),
+  lon = c(-121.850123,-121.591315,-121.702809, -121.374990, -121.999971, -121.738924, -121.590239)
+)
 
+## Electrical Conductivity -----------------------
 ec_data <- lapply(stations,
                    function(x) {
                      CDECquery(id = x,sensor = 100, interval = "E", start = start_date,end = end_date)
@@ -59,13 +65,14 @@ wt_raw <- bind_rows(wt_data)%>%
 saveRDS(wt_raw, "data/data_raw/wt_raw_2024.rds")
 
 # Clean data ---------------------------------
+
 ## Electrical Conductivity --------------------------
 ec_raw0 <- readRDS(here("data/data_raw/ec_raw_2024.rds"))%>%
   mutate(datetime = ymd_hms(datetime)) %>%
   filter(date > ymd("2023-09-30")) %>%
   rename(station = station_id)
 
-# Complete data set 
+# Complete data set with missing timestamps
 
 # Build full 15-min sequence
 full_time <- tibble(
@@ -74,10 +81,11 @@ full_time <- tibble(
                  by   = "15 min")
 )
 
+# Combine station and time combos
 sta_time <- crossing(stations, full_time) %>%
   rename(station = stations)
 
-# Join with your data
+# Join with EC data
 ec_raw <- sta_time %>%
   left_join(ec_raw0, by = c("station", "datetime")) %>%
     mutate(station_d1641 = case_when(station == "CLL" ~ "C2",
@@ -135,11 +143,6 @@ library(dbscan)
 ec_qc <- ec_raw %>%
   # belowzero 
   mutate(belowzero = if_else(station != "CLL" & ec <=0, 1L, if_else(ec<0, 1L, 0L)))%>%
-  # missing data 
-  group_by(station, date) %>%
-  mutate(missingvals = sum(is.na(ec)),
-         missing_flag = if_else(missingvals/96>=0.7, 1L, 0L)) %>%
-  ungroup() %>%
   # duplicated
   group_by(station) %>%
   mutate(same = ifelse(ec == lag(ec, 1, default = 0), 1L, 0L),
@@ -171,7 +174,6 @@ ec_qc <- ec_raw %>%
   ungroup() %>% 
   mutate(outlier = ifelse(ec < rmean-4*rsd | ec > rmean+4*rsd, 1L, 0L)) %>%
   ungroup() %>%
-  
   # filter(complete.cases(ec)) %>%
   # mutate(repeated = if_else((lag(ec,1) == ec & lag(ec,2) == ec & lag(ec,3) == ec)| 
            # (lead(ec,1) == ec & lead(ec,2) == ec & lead(ec,3) == ec), 1L, 0L)) %>%
@@ -182,7 +184,7 @@ ec_qc <- ec_raw %>%
                           ec > 1.5 * lead(ec, 1, default = first(ec)), 1L, 0L)) %>%
   ungroup() %>%
   # summarize
-  mutate(flagged = if_else(belowzero == 1L | missing_flag == 1L |repeated == 1L | outlier == 1L | spike == 1L, "flagged", "not flagged")) 
+  mutate(flagged = if_else(belowzero == 1L | repeated == 1L | outlier == 1L | spike == 1L, "flagged", "not flagged")) 
 
 # look at flagged outliers
 ggplot(ec_qc %>% filter(!is.na(datetime))) + 
@@ -201,6 +203,7 @@ ec_qc2 <- ec_qc %>%
                           station == "CLL" & month %in% c(11,12) & ec < 120 ~1L,
                           station == "CLL" & date== ymd("2023-11-29") & ec == 1074 ~ 1L,
                           station == "CNT" & ec>1000 ~1L,
+                          station == "CNT" & date== ymd("2024-09-30") ~ 1L,
                           station == "CNT" & date >= ymd("2023-10-17") & date<=ymd("2023-10-20") & ec <270 ~ 1L,
                           station == "CNT" & date >=ymd("2023-11-20") & date <= ymd("2023-12-19") ~ 1L,
                           station == "DMC" & ec > 2000~1L,
@@ -210,7 +213,7 @@ ec_qc2 <- ec_qc %>%
                           station == "DMC" & ec < 100 ~ 1L,
                           station == "DMC" & date == ymd("2024-04-18") & ec < 200 ~ 1L,
                           TRUE~0L)) %>%
-  mutate(flagged = if_else(belowzero == 1L | missing_flag == 1L | vis_flag == 1L, "flagged", "not flagged")) 
+  mutate(flagged = if_else(belowzero == 1L | vis_flag == 1L, "flagged", "not flagged")) 
 
 # look at this version of flags
 ggplot(ec_qc2 %>% filter(!is.na(datetime))) + 
@@ -257,14 +260,6 @@ plotly::ggplotly(emm_ec)
 
 plotly::ggplotly(cll_ec)
 
-### Summary of data removed --------------
-
-ec_qc2 %>%
-  group_by(station) %>%
-  summarize(removed = sum(flagged == "flagged"),
-            values = n(),
-            pct_removed = removed/values*100)
-
 
 ### Write --------------------------
 saveRDS(ec_qc2, here("data/data_clean/ec_WY2024_flagged.rds"))
@@ -277,16 +272,18 @@ wt_raw0 <- readRDS(here("data/data_raw/wt_raw_2024.rds"))%>%
   filter(date > ymd("2023-09-30")) %>%
   rename(station = station_id)
 
+# Make hourly dataset
 hour_time <- tibble(
   datetime = seq(from = start_date,
                  to   = end_date,
                  by   = "1 hour")
 )
 
+# Combine with stations
 sta_hour <- crossing(stations, hour_time) %>%
   rename(station = stations)
 
-# Join with your data
+# Join with WT data
 wt_raw <- sta_hour %>%
   left_join(wt_raw0, by = c("station", "datetime")) %>%
   mutate(station_d1641 = case_when(station == "CLL" ~ "C2",
@@ -312,11 +309,6 @@ wt_raw <- sta_hour %>%
 wt_qc <- wt_raw %>%
   # belowzero 
   mutate(range = if_else(wt <=32 | wt>=90, 1L, 0L))%>%
-  # missing data 
-  group_by(station, date) %>%
-  mutate(missingvals = sum(is.na(wt)),
-         missing_flag = if_else(missingvals/24>=0.7, 1L, 0L)) %>%
-  ungroup() %>%
   # duplicated
   group_by(station) %>%
   mutate(same = ifelse(wt == lag(wt, 1, default = 0), 1L, 0L),
@@ -358,7 +350,7 @@ wt_qc <- wt_raw %>%
                            wt > 1.5 * lead(wt, 1, default = first(wt)), 1L, 0L)) %>%
   ungroup() %>%
   # summarize
-  mutate(flagged = if_else(range == 1L | missing_flag == 1L| repeated == 1L | outlier == 1L | spike == 1L, "flagged", "not flagged")) 
+  mutate(flagged = if_else(range == 1L |  repeated == 1L | outlier == 1L | spike == 1L, "flagged", "not flagged")) 
 
 # check what this looks like
 ggplot(wt_qc %>% filter(!is.na(datetime))) + 
@@ -387,8 +379,9 @@ wt_qc2 <- wt_qc %>%
                               station == "CLL"  & wt<49.5~1L,
                               station == "CLL"  &date >=ymd("2024-03-22") & date <= ymd("2024-03-27") &wt<55~1L,
                               station == "CNT" &date >=ymd("2023-11-20") & date <= ymd("2023-12-19") ~ 1L,
+                              station == "CNT" & date== ymd("2024-09-30") ~ 1L,
                               TRUE~0L)) %>%
-  mutate(flagged = if_else(range == 1L | missing_flag == 1L | vis_flag == 1L, "flagged", "not flagged")) 
+  mutate(flagged = if_else(range == 1L |  vis_flag == 1L, "flagged", "not flagged")) 
 
 # check with this looks like
 ggplot(wt_qc2 %>% filter(!is.na(datetime))) + 
@@ -465,19 +458,12 @@ plotly::ggplotly(dmc_wt)
 
 plotly::ggplotly(cll_wt)
 
-### Summary of data removed --------------
-wt_qc2 %>%
-  group_by(station) %>%
-  summarize(removed = sum(flagged == "flagged"),
-            values = n(),
-            pct_removed = removed/values*100)
-
 
 ### Write --------------------------
 saveRDS(wt_qc2, here("data/data_clean/wt_WY2024_flagged.rds"))
 saveRDS(wt_clean, here("data/data_clean/wt_WY2024_clean.rds"))
 
-## Combine data ------------------------
+## Combine WT and EC data ------------------------
 
 # function to convert EC to SPC
 ec_to_spc <- function(EC, temp, alpha = 0.019) {
@@ -485,7 +471,8 @@ ec_to_spc <- function(EC, temp, alpha = 0.019) {
   return(SpC)
 }
 
-alldata <- left_join(ec_clean %>% select(station, station_d1641, month, datetime, date, ec),
+# Join ec and wt; convert ec to spc
+alldata <- full_join(ec_clean %>% select(station, station_d1641, month, datetime, date, ec),
           wt_clean%>% select(station, station_d1641, datetime, date, wt)) %>%
   mutate(spc = ec_to_spc(ec, wt)) 
 
@@ -494,15 +481,22 @@ alldata <- left_join(ec_clean %>% select(station, station_d1641, month, datetime
 # data. Could fill downward to calculate more values, but probably not necessary 
 # since this all gets averaged to daily anyways. 
 
+# calculate daily mean
 dailydata <- alldata %>%
   group_by(station, station_d1641, date, month) %>%
   summarize(wt_n = sum(!is.na(wt)),
             wt_mean = round(mean(wt, na.rm = TRUE),1),
-         spc_mean = round(mean(spc, na.rm = TRUE),1),
-         spc_n = sum(!is.na(spc))) %>%
+            spc_mean = round(mean(spc, na.rm = TRUE),1),
+            spc_n = sum(!is.na(spc))) %>%
   ungroup()
 
-dailydata_formatted <- dailydata %>%
+# read in regions
+regions <- read_csv(here("data/data_clean/compliance-monitoring-station-regions.csv"))%>%
+  rename(Station = StationID) %>%
+  filter(Component == "Continuous WQ")
+
+# format 
+dailydata_formatted0 <- dailydata %>%
   pivot_longer(cols = c(wt_mean, wt_n, spc_mean, spc_n),
                names_to = c("Analyte", "ValueType"),
                names_sep = "_") %>%
@@ -510,11 +504,21 @@ dailydata_formatted <- dailydata %>%
               values_from = "value") %>%
   select(Date = date, Count = n, Value=mean, Site = station, Station = station_d1641, Month=month,
          Analyte) %>%
+  group_by(Site, Date) %>%
+  # Remove days that have 30% or more values missing
+  mutate(missing_flag = if_else(1-(Count/24)>=0.7, 1L, 0L)) %>%
+  ungroup() 
+
+dailydata_formatted <- dailydata_formatted0 %>% left_join(regions %>% select(Station, Region), by = "Station") %>%
+  mutate(Value = replace(Value, is.nan(Value), NA)) %>%
   mutate(Analyte = case_when(Analyte == "wt" ~ "WaterTemperature",
-                             Analyte == "spc" ~ "SpC")) %>%
+                             Analyte == "spc" ~ "SpC"),
+         Value = replace(Value, missing_flag == 1L, NA )) %>%
+  select(-missing_flag) %>%
   arrange(Analyte, Site, Date)
 
-# Look at each station
+# Look at each station 
+# (fcn)
 plot_vals <- function(CDEC_sta) {
   ggplot(dailydata_formatted %>% filter(Site == CDEC_sta))+
     geom_point(aes(Date, Value, color = Analyte)) +
@@ -522,9 +526,9 @@ plot_vals <- function(CDEC_sta) {
     theme_bw()
 }
 
+# I end up looking at each station in the quarto file 
 plot_vals("CLL")
 
-
 # Write dataset 
-
+saveRDS(dailydata_formatted0, here("data/data_clean/usbr_contdata_wy2024_missingflag.rds"))
 saveRDS(dailydata_formatted, here("data/data_clean/usbr_contdata_wy2024.rds"))
