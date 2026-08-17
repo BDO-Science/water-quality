@@ -27,52 +27,50 @@ Examine USBR stations listed in the Water Quality Control Plan to determine whet
 
 **Communications from Ted**
 
--   The station contact is Melanie Lowe at USBR's California-Great Basin Regional Office
--   When we last emailed in December, she said “our office staff clean and calibrate the stations monthly when we are able to access them, and Central Valley Office coordinates with Tracy Office regarding issues w/access or stations going down/not reporting. However, I believe Tracy Office is currently cleaning/calibrating/maintaining the Collinsville and Ripon stations routinely.”
--   C19 discontinued due to safety concerns and because the city of Vallejo no longer uses the intake on Cache Slough. Ted was not able to find any documentation that this was ever officially communicated to SWRCB.
+* The station contact is Melanie Lowe at USBR's California-Great Basin Regional Office
+* When we last emailed in December, she said “our office staff clean and calibrate the stations monthly when we are able to access them, and Central Valley Office coordinates with Tracy Office regarding issues w/access or stations going down/not reporting. However, I believe Tracy Office is currently cleaning/calibrating/maintaining the Collinsville and Ripon stations routinely.”
+* C19 discontinued due to safety concerns and because the city of Vallejo no longer uses the intake on Cache Slough. Ted was not able to find any documentation that this was ever officially communicated to SWRCB. 
 
 **Requirements in Table 5 of the WQCP**
 
--   **For CLL, SAL, CNT, UNI, PCT, CCS, EMM**: Continuous recording (every 15 minutes) of water temperature, electrical conductivity (EC), and/or dissolved oxygen. For municipal and industrial intake chloride objectives, EC can be monitored and converted to chloride concentration.
--   **For DMC**: Continuous, multi-parameter monitoring (recording every 1 to 15 minutes with telemetry capabilities) includes the following variables: water temperature, EC, pH, dissolved oxygen, turbidity, chlorophyll a fluorescence, tidal elevation, and meteorological data (air temperature, wind speed and direction, solar radiation).
+* **For CLL, SAL, CNT, UNI, PCT, CCS, EMM**: Continuous recording (every 15 minutes) of water temperature, electrical conductivity (EC), and/or dissolved oxygen. For municipal and industrial intake chloride objectives, EC can be monitored and converted to chloride concentration. 
+* **For DMC**: Continuous, multi-parameter monitoring (recording every 1 to 15 minutes with telemetry capabilities) includes the following variables: water temperature, EC, pH, dissolved oxygen, turbidity, chlorophyll a fluorescence, tidal elevation,
+and meteorological data (air temperature, wind speed and direction, solar radiation).
 
 \pagebreak
-
 **What is on CDEC**
 
--   C2 – Sacramento River at Collinsville (CLL): EC (100 - event), WT (25 - hourly)
--   C4 – SJR at San Andreas Landing (SAL): EC (100 - event), WT (25 - hourly)
--   C5 – Contra Costa Canal at Pumping Plant #1 (CNT): EC (100 - event), WT (25 - hourly)
--   C8 – Old River near Middle River (UNI): EC (100 - event), WT (25 - hourly)
--   C14 – Sacramento River at Port Chicago (PCT): EC (sensor 100), WT (25 - event)
--   \*C19 – Cache Slough at City of Vallejo Intake (CCS): discontinued 1/1/2015
--   D22 – Sacramento River at Emmaton (EMM): EC (100 - event), WT (25 - hourly)
--   DMC1 – Delta-Mendota Canal at Jones Pumping Plant (DMC): EC (100 - event), WT (25 - hourly)
+*	C2 – Sacramento River at Collinsville (CLL): EC (100 - event), WT (25 - hourly)
+*	C4 – SJR at San Andreas Landing (SAL): EC (100 - event), WT (25 - hourly)
+* C5 – Contra Costa Canal at Pumping Plant #1 (CNT): EC (100 - event), WT (25 - hourly)
+*	C8 – Old River near Middle River (UNI): EC (100 - event), WT (25 - hourly)
+*	C14 – Sacramento River at Port Chicago (PCT): EC (sensor 100), WT (25 - event)
+*	*C19 – Cache Slough at City of Vallejo Intake (CCS): discontinued 1/1/2015
+*	D22 – Sacramento River at Emmaton (EMM): EC (100 - event), WT (25 - hourly)
+*	DMC1 – Delta-Mendota Canal at Jones Pumping Plant (DMC): EC (100 - event), WT (25 - hourly)
 
 **Conclusions**
 
--   We are unsure if we are supposed to be collecting WT, EC, AND DO at the 15-minute interval. If so, we are only collecting EC at the frequency specified by Table 5 for water temperature.
-    -   Ted: In some cases, D-1641 has explicit compliance requirements related to one or the other parameters (e.g., EC at D10 and C14 as described in Table 4). This is also true for DO at P8, although that’s spelled out in the Bay-Delta Water Quality Control Plan rather than D-1641.
-    -   Scott/Ted: Since 2007, the Continuous Environmental Monitoring Program (CEMP) has been capturing real-time data every 15 minutes for all water quality constituents, including SpC (EC), DO, and WT, from our 15 monitoring stations. / Scott’s decision to have his group move to fully-equipped instruments (pH, EC, Temp, DO, Chl-a, and Turbidity sensors) for all of their baseline/compliance stations even when not explicitly required by D-1641 came partially from internal DWR requests for that data but also just to avoid any confusion...generally our thought is calibrating six sensors on an EXO2 doesn’t really cost all that much more compared to just temp and EC (in either equipment or staff time) and the data is often quite valuable.
--   We are not collecting all the parameters specifed by Table 5 for DMC.
--   Most stations seem to be collected relatively well for 2024, except CNT which was missing a few months of data.
--   CLL and DMC also have \>10% data outside of suitable range/not collected.
+* We are unsure if we are supposed to be collecting WT, EC, AND DO at the 15-minute interval. If so, we are only collecting EC at the frequency specified by Table 5 for water temperature. 
+  * Ted: In some cases, D-1641 has explicit compliance requirements related to one or the other parameters (e.g., EC at D10 and C14 as described in Table 4). This is also true for DO at P8, although that’s spelled out in the Bay-Delta Water Quality Control Plan rather than D-1641.
+  * Scott/Ted: Since 2007, the Continuous Environmental Monitoring Program (CEMP) has been capturing real-time data every 15 minutes for all water quality constituents, including SpC (EC), DO, and WT, from our 15 monitoring stations. / Scott’s decision to have his group move to fully-equipped instruments (pH, EC, Temp, DO, Chl-a, and Turbidity sensors) for all of their baseline/compliance stations even when not explicitly required by D-1641 came partially from internal DWR requests for that data but also just to avoid any confusion...generally our thought is calibrating six sensors on an EXO2 doesn’t really cost all that much more compared to just temp and EC (in either equipment or staff time) and the data is often quite valuable. 
+* We are not collecting all the parameters specifed by Table 5 for DMC. 
+* Most stations seem to be collected relatively well for 2024, except CNT which was missing a few months of data. 
+* CLL and DMC also have >10% data outside of suitable range/not collected.
 
 **Next Steps**
 
--   We could get the QA/QC protocols from Melanie's group. All we did here was basic range filtering, and not 100% sure of appropriate EC range.
--   We could check if extra data are collected that are not reported on CDEC.
--   We could check why certain parameters are collected at frequencies different from what has been specified in the Water Quality Control Plan.
--   Ted: the new Bay-Delta Plan POI would really benefit from a separate table for continuous water quality that specifies exactly what parameters they want measured at each station. The footnote thing and differentiating between “continuous recorder” and “multiparameter” stations is really confusing
+* We could get the QA/QC protocols from Melanie's group. All we did here was basic range filtering, and not 100% sure of appropriate EC range.
+* We could check if extra data are collected that are not reported on CDEC.
+* We could check why certain parameters are collected at frequencies different from what has been specified in the Water Quality Control Plan.
+* Ted: the new Bay-Delta Plan POI would really benefit from a separate table for continuous water quality that specifies exactly what parameters they want measured at each station. The footnote thing and differentiating between “continuous recorder” and “multiparameter” stations is really confusing
 
 \pagebreak
-
 # Analysis
 
-## Electrical Conductivity
+## Electrical Conductivity 
 
 ### Download data
-
 ```{r download data, include = FALSE}
 # stations <- c("CLL", "SAL", "CNT", "UNI", "PCT", "CCS", "EMM", "DMC")
 # start <- "2024-01-01"
@@ -96,7 +94,6 @@ ec <- readRDS("data/data_raw/ec_2024.rds") %>% mutate(month = factor(month))
 ```
 
 ### Examine range of values
-
 ```{r , fig.cap = "Boxplot of EC (uS/cm) values in 2024.", fig.height = 7, fig.width = 6}
 ggplot(ec %>% filter(!is.na(month))) + 
   geom_boxplot(aes(month,value, fill = month))+
@@ -107,11 +104,9 @@ ggplot(ec %>% filter(!is.na(month))) +
 ```
 
 \pagebreak
-
 Filtered to suitable ranges, with 1000 uS/cm as upper limit for CNT, DMC, SAL, UNI, and no upper limit for other stations.
 
 ### Histogram for filtered values
-
 ```{r, fig.height = 8, fig.width = 6, fig.cap = "Histogram of EC values.", fig.height = 6, fig.width = 5.5}
 ggplot(ec %>%filter(range == 1)) + geom_histogram(aes(value), color = "lightblue4")+
   facet_wrap(~station_id, scales = "free_x", ncol = 2) +
@@ -120,11 +115,9 @@ ggplot(ec %>%filter(range == 1)) + geom_histogram(aes(value), color = "lightblue
 ```
 
 \pagebreak
-
 ## Water Temperature
 
 ### Download Data
-
 ```{r, include = FALSE}
 # wt_data <- lapply(stations,
 #                    function(x) {
@@ -144,7 +137,6 @@ wt <- readRDS("data/data_raw/wt_2024.rds") %>% mutate(month = factor(month))
 ```
 
 ### Examine range of water temperature values
-
 ```{r, fig.cap = "Boxplot of WT (deg F) values in 2024.", fig.height = 7, fig.width = 6}
 ggplot(wt %>% filter(!is.na(month))) + 
   geom_boxplot(aes(month, value, fill = month))+
@@ -156,17 +148,17 @@ ggplot(wt %>% filter(!is.na(month))) +
 ```
 
 \pagebreak
-
-Filtered to suitable ranges, with 30F as lower limit and 100F as upper limit. Not sure what the deal with DMC is in February, CLL in August.
+Filtered to suitable ranges, with 30F as lower limit and 100F as upper limit.
+Not sure what the deal with DMC is in February, CLL in August.
 
 ### Filtered data histogram
-
 ```{r, fig.cap = "Histogram of WT values.", fig.heigh = 6, fig.width = 5.5}
 ggplot(wt %>%filter(range == 1)) + geom_histogram(aes(value), color = "lightblue4")+
   facet_wrap(~station_id, ncol = 2) +
   labs(x = "Water Temperature (F)")+
   theme_bw()
 ```
+
 
 \pagebreak
 
@@ -201,7 +193,6 @@ prop_data <- bind_rows(prop_ec_year, prop_wt_year)
 ```
 
 # Summary
-
 ```{r, fig.cap = "Proportion of EC and WT Data Collected and within Range in 2024."}
 ggplot(prop_data) + 
   geom_col(aes(station_id, prop_all, fill = sensor), position = position_dodge2()) +
@@ -212,18 +203,16 @@ ggplot(prop_data) +
 ```
 
 \pagebreak
-
 ```{r , tab.cap= "Sample Sizes of Data and Proportion of Good Data. Prop_good = Proportion of data that was collected that was within range. Prop_all = Proportion of data that should have been collected (if all time points were available) that was within range."}
 library(kableExtra)
 kableExtra::kable(prop_data)
 ```
 
-\pagebreak
 
+\pagebreak
 # Individual Station Plots
 
 ## Electrical Conductivity
-
 ```{r , include = FALSE}
 proportional_ec <- ec %>%
   group_by(station_id, date, year, month,doy, day) %>%
@@ -252,37 +241,31 @@ plot_ec("CLL")
 ```
 
 \pagebreak
-
 ```{r, fig.cap = "Proportion of EC values collected and within range by day at CNT. White boxes are missing data for the entire day."}
 plot_ec("CNT")
 ```
 
 \pagebreak
-
 ```{r, fig.cap = "Proportion of EC values collected and within range by day at SAL White boxes are missing data for the entire day."}
 plot_ec("SAL")
 ```
 
 \pagebreak
-
 ```{r, fig.cap = "Proportion of EC values collected and within range by day at UNI White boxes are missing data for the entire day."}
 plot_ec("UNI")
 ```
 
 \pagebreak
-
 ```{r, fig.cap = "Proportion of EC values collected and within range by day at PCT. White boxes are missing data for the entire day."}
 plot_ec("PCT")
 ```
 
 \pagebreak
-
 ```{r, fig.cap = "Proportion of EC values collected and within range by day at EMM. White boxes are missing data for the entire day."}
 plot_ec("EMM")
 ```
 
 \pagebreak
-
 ```{r, fig.cap = "Proportion of EC values collected and within range by day at DMC. White boxes are missing data for the entire day."}
 plot_ec("DMC")
 ```
@@ -319,37 +302,31 @@ plot_wt("CLL")
 ```
 
 \pagebreak
-
 ```{r, fig.cap = "Proportion of WT values collected and within range by day at CNT. White boxes are missing data for the entire day."}
 plot_wt("CNT")
 ```
 
 \pagebreak
-
 ```{r, fig.cap = "Proportion of WT values collected and within range by day at CNT. White boxes are missing data for the entire day."}
 plot_wt("SAL")
 ```
 
 \pagebreak
-
 ```{r, fig.cap = "Proportion of WT values collected and within range by day at UNI. White boxes are missing data for the entire day."}
 plot_wt("UNI")
 ```
 
 \pagebreak
-
 ```{r, fig.cap = "Proportion of WT values collected and within range by day at PCT. White boxes are missing data for the entire day."}
 plot_wt("PCT")
 ```
 
 \pagebreak
-
 ```{r, fig.cap = "Proportion of WT values collected and within range by day at EMM. White boxes are missing data for the entire day."}
 plot_wt("EMM")
 ```
 
 \pagebreak
-
 ```{r, fig.cap = "Proportion of WT values collected and within range by day at DMC. White boxes are missing data for the entire day."}
 plot_wt("DMC")
 ```
