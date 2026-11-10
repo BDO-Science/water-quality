@@ -38,7 +38,7 @@ library(janitor)
 # Download data --------------------------
 # removed CCS since no data
 stations <- c("CLL", "SAL", "CNT", "UNI", "PCT", "EMM", "DMC")
-start_date <- as.POSIXct("2024-10-01 00:00:00", tz = "UTC")
+start_date <- as.POSIXct("2024-10-01 00:15:00", tz = "UTC")
 end_date   <- as.POSIXct("2025-09-30 23:45:00", tz = "UTC")
 latlon <- data.frame(
   station = stations,
@@ -203,6 +203,7 @@ emm <- wt_qc %>%
   filter(station == "EMM") %>% 
   filter(wt< 100)
 
+
 ggplot(emm, aes(datetime, wt))+
   geom_point(aes(datetime, wt, color = flagged, shape = flagged))+
   #facet_wrap(~station, scales = "free_y", ncol = 2) +
@@ -212,6 +213,7 @@ ggplot(emm, aes(datetime, wt))+
   scale_color_manual(values = c("magenta", "black"))+
   theme_bw() + 
   theme(legend.position = "bottom")
+
 
 pct <- wt_qc %>% 
   filter(station == "PCT") %>% 
@@ -274,6 +276,7 @@ wt_qc2 <- wt_qc %>%
                               station == "DMC" & datetime >= "2025-04-17 16:00:00 UTC" & datetime <= "2025-05-01 09:00:00 UTC" ~1L,
                               station == "DMC" & date >=ymd("2025-08-25") & wt < 70 ~1L,
                               station == "EMM" & wt > 100 ~1L,
+                              station == "EMM" & datetime < "2025-04-15 11:00:00 UTC" ~1L,
                               station == "EMM" & datetime >= "2025-05-15 11:00:00 UTC" & datetime <= "2025-05-16 11:00:00 UTC" & wt <65 ~1L,
                               station == "PCT" & wt > 100 ~1L,
                               station == "PCT" & date >=ymd("2025-09-01") & wt >= 73 ~1L,
@@ -370,6 +373,30 @@ plotly::ggplotly(dmc_wt)
     scale_color_manual(values = c("magenta", "black")))
 plotly::ggplotly(uni_wt)
 
+
+
+#### EMM looks very low- compare to surrounding data
+# download nearby stations- SDI, M13
+
+sdi_raw <- CDECquery(id = "SDI", sensor = "25", interval = "E", start = start_date, end = end_date) %>% 
+  mutate(datetime = format(as.POSIXct(datetime), "%Y-%m-%d %H:%M:%S"),
+         date = date(datetime),
+         year = year(date))
+m13_raw <- CDECquery(id = "M13", sensor = "25", interval = "E", start = start_date, end = end_date)
+
+m13_raw <- read.csv(here("data/data_clean/primary-time-series_m13.csv")) %>% 
+  mutate(datetime = format(as.POSIXct(time), "%Y-%m-%d %H:%M:%S"),
+         date = date(datetime),
+         year = year(date))
+m13_raw <- m13_raw %>% 
+  mutate(degf= (value * 9/5)+32)
+
+
+
+
+ggplot(m13_raw, aes(x= date, y= degf))+
+  geom_line()+
+  geom_line(data= emm, aes(x= date, y= wt), color= "blue")
 
 ### Write --------------------------
 saveRDS(wt_qc2, here("data/data_clean/wt_WY2025_flagged.rds"))
